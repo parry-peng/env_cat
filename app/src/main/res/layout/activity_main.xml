@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/img"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:src="@drawable/ic_launcher_foreground"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="43dp" />
+
+    <Button
+        android:id="@+id/btn_downloadFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="连接视频"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="487dp" />
+
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="更新信息"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="487dp" />
+
+    <TextView
+        android:id="@+id/wendu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="温度:"
+        tools:layout_editor_absoluteX="309dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+    <TextView
+        android:id="@+id/wendu0"
+        android:layout_width="77dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:text="NAN"
+        tools:layout_editor_absoluteX="1000dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+    <TextView
+        android:id="@+id/shidu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="湿度:"
+        tools:layout_editor_absoluteX="309dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+    <TextView
+        android:id="@+id/shidu0"
+        android:layout_width="77dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:text="NAN"
+        tools:layout_editor_absoluteX="1000dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+    <TextView
+        android:id="@+id/zhongli"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="重力:"
+        tools:layout_editor_absoluteX="309dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+    <TextView
+        android:id="@+id/zhongli0"
+        android:layout_width="77dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:text="NAN"
+        tools:layout_editor_absoluteX="1000dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+    <TextView
+        android:id="@+id/tishi"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="点击更新数据后请尝试重新点击连接视频"
+        tools:layout_editor_absoluteX="1000dp"
+        tools:layout_editor_absoluteY="480dp" />
+
+</LinearLayout>
