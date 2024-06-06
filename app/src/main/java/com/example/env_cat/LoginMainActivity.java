@@ -54,6 +54,7 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
     private String TAG = "Login-Panel";
     private static String action = "com.Login.ACTION_RECEIVE";//用于IntentFilter识别
     private static final String ACTION_PUBLISH = "com.Login.ACTION_PUBLISH";
+    String ReceiverStr = null;//接收MQTT消息的变量
 
     DatabaseHelper dbHelper;
 
@@ -115,11 +116,27 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
         @Override
         public void onReceive(Context context, Intent msgintent) {
             // TODO Auto-generated method stub
-            String ReceiverStr = Objects.requireNonNull(msgintent.getExtras()).getString("MQTT_RevMsg");
+            ReceiverStr = Objects.requireNonNull(msgintent.getExtras()).getString("MQTT_RevMsg");
             if (ReceiverStr == null) {
                 return;
             }
             Log.i(TAG, "MQTT接收消息：" + ReceiverStr);
+
+            try {
+                JSONObject user_info = new JSONObject(ReceiverStr);
+                if (ReceiverStr != null && user_info.getString("STATUS").equals("True")) {
+                    // user_info在STATUS为空时，JSon中还有一个对象"RESULT"为查询到的数据
+                    Toast.makeText(LoginMainActivity.this, "登录成功!", Toast.LENGTH_SHORT).show();
+                    // 创建一个意图对象，准备跳到指定的活动页面
+                    Intent intent_login2main = new Intent(LoginMainActivity.this, MainActivity.class);
+                    // 设置启动标志：跳转到新页面时，栈中的原有实例都被清空，同时开辟新任务的活动栈
+                    intent_login2main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent_login2main);
+                }
+            } catch (JSONException e) {
+                Log.e(TAG, "解析服务器传来的JSon数据出错");
+                throw new RuntimeException(e);
+            }
         }
     };
 
@@ -187,8 +204,9 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                         publishIntent.putExtra("TOPIC", "/sys/android/service/verify");
                         publishIntent.putExtra("MESSAGE", JsonMESSAGE.toString());
                         sendBroadcast(publishIntent);//向MqttManager发送广播
+//                        publishIntent.getStringExtra("TOPIC");
                     } catch (JSONException e) {
-                        Log.e("Login-Panel-JSONObject", "Json封装及发送出错");
+                        Log.e("Login-Panel-JSONObject", "处理服务器返回的JSon字符串出错");
                         throw new RuntimeException(e);
                     }
                 }
