@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,13 +25,17 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.ViewUtils;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
 import com.example.env_cat.util.ViewUtil;
+
+import java.util.Objects;
 
 public class LoginMainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -43,16 +48,31 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
     private Button btn_login;
     private SharedPreferences preferences;
     private Intent mIntent;
-    private String TAG = "s-bran";
-    private static String action = "/sys/android/service/auth";
+    private String TAG = "Login-Panel";
+    private static String action = "com.Login.ACTION_RECEIVE";//用于IntentFilter识别
+    private static final String ACTION_PUBLISH = "com.Login.ACTION_PUBLISH";
 
     DatabaseHelper dbHelper;
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login_main);
+
+        /* 启动MQTT服务 */
+        Intent intent = new Intent(getApplicationContext(), MqttManager.class);
+        startService(intent);
+
+        /*************************通过广播接收的方式从MqttService中接收数据*************************/
+        IntentFilter filter = new IntentFilter(LoginMainActivity.action);
+        getApplicationContext().registerReceiver(bc_Receiver, filter, Context.RECEIVER_EXPORTED);
+        Log.d(TAG, "MainActivity start");
+        /*************************通过广播接收的方式从MqttService中接收数据*************************/
+
+
+
 
         // 创建 DatabaseHelper 对象,利用构造方法进行初始化
         dbHelper = new DatabaseHelper(this);
@@ -84,10 +104,24 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                 }
             }
         });
-
         preferences = getSharedPreferences("config", Context.MODE_PRIVATE);
         reload();
     }
+
+    /**
+     * 广播消息接收器
+     */
+    public BroadcastReceiver bc_Receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent msgintent) {
+            // TODO Auto-generated method stub
+            String ReceiverStr = Objects.requireNonNull(msgintent.getExtras()).getString("MQTT_RevMsg");
+            if (ReceiverStr == null) {
+                return;
+            }
+            Log.i(TAG, "MQTT接收消息：" + ReceiverStr);
+        }
+    };
 
     private void reload() {
         boolean isRemember = preferences.getBoolean("isRemember", false);
@@ -116,6 +150,12 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                 register.launch(intent);
                 break;
             case R.id.btn_login:
+                /* 发布消息MQTT */
+                Intent publishIntent = new Intent(ACTION_PUBLISH);
+                publishIntent.putExtra("TOPIC", "/sys/android/service/verify");
+                publishIntent.putExtra("MESSAGE", "Hello MQTT!");
+                sendBroadcast(publishIntent);
+
                 SQLiteDatabase db = dbHelper.getReadableDatabase(); //create or open a database
                 Cursor cursor = db.query("users", new String[]{"user_id", "user_psw"}, "user_id=?", new String[]{phone}, null, null, null, "0,1");
                 if (!cursor.isBeforeFirst() || !cursor.moveToFirst()) {

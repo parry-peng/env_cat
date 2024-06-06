@@ -2,14 +2,19 @@ package com.example.env_cat;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.client.MqttActionListener;
@@ -26,17 +31,17 @@ import java.util.UUID;
 
 public class MqttManager extends Service {
 
-    public static final String TAG = "nice-code";
-    public String HOST = "http://47.108.75.214/:1883";//服务器地址（协议+地址+端口号）
+    public static final String TAG = "MqttManager-Panel";
+    public String HOST = "tcp://47.108.75.214:1883";//服务器地址（协议+地址+端口号）
     public String USERNAME = "loss_expenience_android";//用户名
     public String PASSWORD = "123456";//密码
     public static String PUBLISH_TOPIC = "/sys/android/service/verify";//发布主题
     public static String SUBSCRIVE_TOPIC = "/sys/android/service/auth";//订阅主题
-
+    private static final String ACTION_PUBLISH = "com.Login.ACTION_PUBLISH";
     @SuppressLint("MissingPermission")
     public String CLIENTID = UUID.randomUUID().toString().replaceAll("-", "");//客户端ID
 
-    public static final String action = "com.nicecode.mymqttservice";//广播消息
+    public static final String action = "com.Login.ACTION_RECEIVE";//广播消息,用于IntentFilter识别
 
     private static MqttAsyncClient mqttAndroidClient;
     private MqttConnectionOptions mMqttConnectOptions;
@@ -47,10 +52,30 @@ public class MqttManager extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    /*
+     * Intent发布的消息向MQTT转发
+     * */
+    private BroadcastReceiver publishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_PUBLISH.equals(intent.getAction())) {
+                String topic = intent.getStringExtra("TOPIC");
+                String message = intent.getStringExtra("MESSAGE");
+//                Log.d(TAG, "向MQTT发布消息:" + message);
+                assert message != null : "message is not null";
+                if (message != null) {
+                    MQTT_Publish(PUBLISH_TOPIC, 0, message);
+                }
+            }
+        }
+    };
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
         init();
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -84,10 +109,11 @@ public class MqttManager extends Service {
      * 发布消息
      */
     public static void MQTT_Publish(String Publish_Topic, Integer qos, String message) {
-        Boolean retained = false;// 是否在服务器保留断开连接后的最后一条消息
+        boolean retained = false;// 是否在服务器保留断开连接后的最后一条消息
         try {
+            Log.d(TAG, "正在向MQTT发布消息...");
             //参数分别为：主题、消息的字节数组、服务质量、是否在服务器保留断开连接后的最后一条消息
-            mqttAndroidClient.publish(Publish_Topic, message.getBytes(), qos, retained.booleanValue());
+            mqttAndroidClient.publish(Publish_Topic, message.getBytes(), qos, retained);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -147,15 +173,17 @@ public class MqttManager extends Service {
 
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-            Log.i(TAG, "收到消息： " + new String(message.getPayload()));
+            Log.d(TAG, "收到消息： " + new String(message.getPayload()));
             Intent intent = new Intent(action);
             Bundle bundle = new Bundle();
             bundle.putString("MQTT_RevMsg", new String(message.getPayload()));
             intent.putExtras(bundle);
             sendBroadcast(intent);
+            getApplicationContext().registerReceiver(publishReceiver, new IntentFilter(ACTION_PUBLISH), Context.RECEIVER_EXPORTED);
         }
 
         @Override
