@@ -132,6 +132,8 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                     // 设置启动标志：跳转到新页面时，栈中的原有实例都被清空，同时开辟新任务的活动栈
                     intent_login2main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent_login2main);
+                }else{
+                    Toast.makeText(LoginMainActivity.this, "登录失败,请联系管理员!", Toast.LENGTH_SHORT).show();
                 }
             } catch (JSONException e) {
                 Log.e(TAG, "解析服务器传来的JSon数据出错");
