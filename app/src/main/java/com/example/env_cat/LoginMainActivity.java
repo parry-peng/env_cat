@@ -35,6 +35,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.env_cat.util.ViewUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Objects;
 
 public class LoginMainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -70,9 +73,6 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
         getApplicationContext().registerReceiver(bc_Receiver, filter, Context.RECEIVER_EXPORTED);
         Log.d(TAG, "MainActivity start");
         /*************************通过广播接收的方式从MqttService中接收数据*************************/
-
-
-
 
         // 创建 DatabaseHelper 对象,利用构造方法进行初始化
         dbHelper = new DatabaseHelper(this);
@@ -150,17 +150,10 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                 register.launch(intent);
                 break;
             case R.id.btn_login:
-                /* 发布消息MQTT */
-                Intent publishIntent = new Intent(ACTION_PUBLISH);
-                publishIntent.putExtra("TOPIC", "/sys/android/service/verify");
-                publishIntent.putExtra("MESSAGE", "Hello MQTT!");
-                sendBroadcast(publishIntent);
-
                 SQLiteDatabase db = dbHelper.getReadableDatabase(); //create or open a database
                 Cursor cursor = db.query("users", new String[]{"user_id", "user_psw"}, "user_id=?", new String[]{phone}, null, null, null, "0,1");
                 if (!cursor.isBeforeFirst() || !cursor.moveToFirst()) {
                     Toast.makeText(this, "请输入正确的用户名和密码", Toast.LENGTH_SHORT).show();
-                    return;
                 }
                 // 游标移动进行校验
                 if (cursor.moveToNext()) {
@@ -171,8 +164,9 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
 //                    String dbPassword = cursor.getString(cursor.getColumnIndex("user_psw"));// 从数据库获取密码进行校验
                         cursor.close();// 关闭游标
                         if (!dbPassword.equals(password)) { //密码校验未通过
-                            Toast.makeText(this, "请输入正确的用户名和密码", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "本地校验失败,尝试查询服务器存储的用户中...", Toast.LENGTH_LONG).show();
                         } else {   //密码校验通过
+                            Toast.makeText(this, "登录成功!", Toast.LENGTH_SHORT).show();
                             // 创建一个意图对象，准备跳到指定的活动页面
                             Intent intent_login2main = new Intent(this, MainActivity.class);
                             // 设置启动标志：跳转到新页面时，栈中的原有实例都被清空，同时开辟新任务的活动栈
@@ -183,9 +177,21 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                         // 处理列名不在结果中的情况
                         Log.e("DatabaseError", "Column 'user_psw' not found in the query result.", e);
                     }
-                    return;
+                } else {//本地没有查询到,查询云服务器上的账号
+                    Toast.makeText(this, "本地校验失败,尝试查询服务器存储的用户中...", Toast.LENGTH_LONG).show();
+                    Intent publishIntent = new Intent(ACTION_PUBLISH);//创建发布消息的Intent,用于连接MqttManager的接收器
+                    try {
+                        JSONObject JsonMESSAGE = new JSONObject();    //创建JSon字符串,用于封装账号信息
+                        JsonMESSAGE.put("pwd", password);
+                        JsonMESSAGE.put("phone", phone);
+                        publishIntent.putExtra("TOPIC", "/sys/android/service/verify");
+                        publishIntent.putExtra("MESSAGE", JsonMESSAGE.toString());
+                        sendBroadcast(publishIntent);//向MqttManager发送广播
+                    } catch (JSONException e) {
+                        Log.e("Login-Panel-JSONObject", "Json封装及发送出错");
+                        throw new RuntimeException(e);
+                    }
                 }
-                cursor.close();// 游标校验失败也要关闭
 
 /*
                 if (ck_remember.isChecked()) {

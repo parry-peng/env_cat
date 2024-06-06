@@ -58,10 +58,11 @@ public class MqttManager extends Service {
     private BroadcastReceiver publishReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "MQTT服务接收到需要转发的消息");
             if (ACTION_PUBLISH.equals(intent.getAction())) {
                 String topic = intent.getStringExtra("TOPIC");
                 String message = intent.getStringExtra("MESSAGE");
-//                Log.d(TAG, "向MQTT发布消息:" + message);
+                Log.d(TAG, "向MQTT发布消息...:" + message);
                 assert message != null : "message is not null";
                 if (message != null) {
                     MQTT_Publish(PUBLISH_TOPIC, 0, message);
@@ -75,7 +76,6 @@ public class MqttManager extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
         init();
-
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -111,7 +111,7 @@ public class MqttManager extends Service {
     public static void MQTT_Publish(String Publish_Topic, Integer qos, String message) {
         boolean retained = false;// 是否在服务器保留断开连接后的最后一条消息
         try {
-            Log.d(TAG, "正在向MQTT发布消息...");
+//            Log.d(TAG, "正在向MQTT发布消息...");
             //参数分别为：主题、消息的字节数组、服务质量、是否在服务器保留断开连接后的最后一条消息
             mqttAndroidClient.publish(Publish_Topic, message.getBytes(), qos, retained);
         } catch (MqttException e) {
@@ -173,17 +173,19 @@ public class MqttManager extends Service {
 
         }
 
+        /*
+         * 上面是接收发送到Android的消息
+         * */
         @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
-
             Log.d(TAG, "收到消息： " + new String(message.getPayload()));
             Intent intent = new Intent(action);
             Bundle bundle = new Bundle();
             bundle.putString("MQTT_RevMsg", new String(message.getPayload()));
             intent.putExtras(bundle);
             sendBroadcast(intent);
-            getApplicationContext().registerReceiver(publishReceiver, new IntentFilter(ACTION_PUBLISH), Context.RECEIVER_EXPORTED);
+
         }
 
         @Override
@@ -207,11 +209,14 @@ public class MqttManager extends Service {
      */
     private MqttActionListener iMqttActionListener = new MqttActionListener() {
 
+        @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
         @Override
         public void onSuccess(IMqttToken arg0) {
             Log.i(TAG, "连接成功 ");
             try {
                 mqttAndroidClient.subscribe(SUBSCRIVE_TOPIC, 2);//订阅主题，参数：主题、服务质量
+                //监听本地发送到MQTT服务器的消息
+                getApplicationContext().registerReceiver(publishReceiver, new IntentFilter(ACTION_PUBLISH), Context.RECEIVER_EXPORTED);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
