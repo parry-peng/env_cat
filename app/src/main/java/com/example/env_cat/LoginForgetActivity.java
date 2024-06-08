@@ -37,7 +37,7 @@ public class LoginForgetActivity extends AppCompatActivity implements View.OnCli
         });
 
         mPhone = getIntent().getStringExtra("phone");
-        Log.i("mPhone" , "mPhone= " + mPhone);
+        Log.i("mPhone", "mPhone= " + mPhone);
 
         et_verifycode = findViewById(R.id.et_verifycode);
         et_password_first = findViewById(R.id.et_password_first);
@@ -65,35 +65,35 @@ public class LoginForgetActivity extends AppCompatActivity implements View.OnCli
 
             case R.id.btn_confirm:
                 // 点击了“确定”按钮
-                Log.i("btn_confirm" , "1");
+                Log.i("btn_confirm", "1");
                 String password_first = et_password_first.getText().toString();
                 String password_second = et_password_second.getText().toString();
-                Log.i("btn_confirm" , "11");
+                Log.i("btn_confirm", "11");
                 if (password_first.length() < 6) {
                     Toast.makeText(this, "请输入正确的密码", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Log.i("btn_confirm" , "2");
+                Log.i("btn_confirm", "2");
 
                 if (!password_first.equals(password_second)) {
                     Toast.makeText(this, "两次输入的新密码不一致", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Log.i("btn_confirm" , "3");
+                Log.i("btn_confirm", "3");
 
                 if (!mVerifyCode.equals(et_verifycode.getText().toString())) {
                     Toast.makeText(this, "请输入正确的验证码", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                Log.i("btn_confirm" , "4");
+                Log.i("btn_confirm", "4");
                 Toast.makeText(this, "密码修改成功", Toast.LENGTH_SHORT).show();
                 // 以下把修改好的新密码返回给上一个页面
                 Intent intent = new Intent();
                 intent.putExtra("new_password", password_first);
                 setResult(Activity.RESULT_OK, intent);
                 finish();
-                Log.i("btn_confirm" , "5");
+                Log.i("btn_confirm", "5");
                 break;
         }
     }

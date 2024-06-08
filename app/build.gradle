@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.env_cat"
-        minSdk 31
+        minSdk 30
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -26,6 +26,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+    buildToolsVersion '34.0.0'
 }
 
 dependencies {
@@ -37,4 +38,8 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    /*************************MQTT依赖包*************************/
+    implementation libs.org.eclipse.paho.mqttv5.client
+    implementation libs.org.eclipse.paho.android.service
+    /*************************MQTT依赖包*************************/
 }

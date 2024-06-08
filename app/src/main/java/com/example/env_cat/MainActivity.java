@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_downloadFile:
                 handler.sendEmptyMessage(DOWNDLOAD);
                 break;
@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
+
     private class HttpHandler extends Handler {
         public HttpHandler(Looper looper) {
             super(looper);
@@ -192,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                             bytesToImageFile(buffer, "pic.jpg");
 
-                            final Bitmap bitmap = BitmapFactory.decodeFile(rootPath+"/pic.jpg");
+                            final Bitmap bitmap = BitmapFactory.decodeFile(rootPath + "/pic.jpg");
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -233,15 +234,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return true;
     }
+
     public static String getSDPath(Context context) {
         File sdDir = null;
         boolean sdCardExist = Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED);// 判断sd卡是否存在
         if (sdCardExist) {
-            if (Build.VERSION.SDK_INT>=29){
+            if (Build.VERSION.SDK_INT >= 29) {
                 //Android10之后
                 sdDir = context.getExternalFilesDir(null);
-            }else {
+            } else {
                 sdDir = Environment.getExternalStorageDirectory();// 获取SD卡根目录
             }
         } else {
@@ -249,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return sdDir.toString();
     }
+
     private void bytesToImageFile(byte[] bytes, String fileName) {
         try {
             File file = new File(getSDPath(this) + "/" + fileName);
@@ -260,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
+
     private void parseJson_display(String json) {   //解析json
         JSONObject jsonObject = null;
         try {
@@ -294,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
+
     private String sendGet(String httpUrl) {
         System.out.println("开始HTTP请求...");
         //链接
