@@ -1,4 +1,4 @@
-package com.example.env_cat;
+package com.example.env_cat.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.example.env_cat.R;
 
 import java.util.Random;
 

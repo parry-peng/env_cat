@@ -17,7 +17,7 @@
         tools:layout_editor_absoluteX="43dp" />
 
     <Button
-        android:id="@+id/btn_downloadFile"
+        android:id="@+id/btn_connVid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="连接视频"
@@ -25,63 +25,94 @@
         tools:layout_editor_absoluteY="487dp" />
 
     <Button
-        android:id="@+id/btn_register"
+        android:id="@+id/btn_updateEnvInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="更新信息"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="487dp" />
 
-    <TextView
-        android:id="@+id/wendu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="温度:"
-        tools:layout_editor_absoluteX="309dp"
-        tools:layout_editor_absoluteY="480dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/wendu0"
-        android:layout_width="77dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
-        android:text="NAN"
-        tools:layout_editor_absoluteX="1000dp"
-        tools:layout_editor_absoluteY="480dp" />
+        <TextView
+            android:id="@+id/tv_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="　温度："
+            android:textColor="@color/black"
+            android:textSize="17sp" />
 
-    <TextView
-        android:id="@+id/shidu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="湿度:"
-        tools:layout_editor_absoluteX="309dp"
-        tools:layout_editor_absoluteY="480dp" />
+        <TextView
+            android:id="@+id/tv_tempVal"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/editext_selector"
+            android:hint="NAN"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/shidu0"
-        android:layout_width="77dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
-        android:text="NAN"
-        tools:layout_editor_absoluteX="1000dp"
-        tools:layout_editor_absoluteY="480dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/zhongli"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="重力:"
-        tools:layout_editor_absoluteX="309dp"
-        tools:layout_editor_absoluteY="480dp" />
+        <TextView
+            android:id="@+id/tv_humi"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="　湿度："
+            android:textColor="@color/black"
+            android:textSize="17sp" />
 
-    <TextView
-        android:id="@+id/zhongli0"
-        android:layout_width="77dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
-        android:text="NAN"
-        tools:layout_editor_absoluteX="1000dp"
-        tools:layout_editor_absoluteY="480dp" />
+        <TextView
+            android:id="@+id/tv_humiVal"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/editext_selector"
+            android:hint="NAN"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_weight"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="　重力："
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/tv_weightVal"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/editext_selector"
+            android:hint="NAN"
+            android:textColor="@color/black"
+            android:textSize="17sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tishi"

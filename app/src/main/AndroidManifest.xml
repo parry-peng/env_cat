@@ -18,27 +18,27 @@
         android:theme="@style/Theme.Env_cat"
         tools:targetApi="31">
         <activity
-            android:name=".LoginForgetActivity"
+            android:name=".activity.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.LoginForgetActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginMainActivity"
+            android:name=".activity.LoginMainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!-- *************************MQTT service************************* -->
+        </activity> <!-- *************************MQTT service************************* -->
         <service
             android:name="org.eclipse.paho.android.service.MqttService"
             tools:ignore="MissingClass" />
         <service android:name=".MqttManager" />
-        <!-- *************************MQTT service************************* -->
-
     </application>
 
 </manifest>

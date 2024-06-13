@@ -1,6 +1,7 @@
 package com.example.env_cat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -56,14 +57,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final int WRITE_PERMISSION = 0x01;
 
     String weight_num, wendu_num, shidu_num;
-    TextView wendu, shidu, zhongli;
+    TextView tv_temp, tv_humiVal, tv_weightVal;
 
     /* 在连接的路由器中查看 */
     String url_address = "192.168.124.56";  // 温湿度 ESP ip地址
     String url_add_esp32cam = "192.168.124.63";     // 摄像头 esp32-arduino ip地址
-    private Button btn_downloadFile;
-    private Button btn_register;
+    private Button btn_connVid;
+    private Button btn_updateEnvInfo;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,19 +82,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         handlerThread.start();
         handler = new HttpHandler(handlerThread.getLooper());
 
-        btn_downloadFile = findViewById(R.id.btn_downloadFile);
-        btn_register = findViewById(R.id.btn_register);
-        btn_downloadFile.setOnClickListener(this);
-        btn_register.setOnClickListener(this);
+        btn_connVid = findViewById(R.id.btn_connVid);
+        btn_updateEnvInfo = findViewById(R.id.btn_updateEnvInfo);
+        btn_connVid.setOnClickListener(this);
+        btn_updateEnvInfo.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_downloadFile:
+            case R.id.btn_connVid:
                 handler.sendEmptyMessage(DOWNDLOAD);
                 break;
-            case R.id.btn_register:
+            case R.id.btn_updateEnvInfo:
                 handler.sendEmptyMessage(REGISTER);
                 ctrl_num = false;   //有更新温湿度重力数据请求
                 break;
@@ -278,20 +280,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             wendu_num = jsonObject.getString("wendu");
             shidu_num = jsonObject.getString("shidu");
 
-            wendu = (TextView) findViewById(R.id.wendu0);
-            shidu = (TextView) findViewById(R.id.shidu0);
-            zhongli = (TextView) findViewById(R.id.zhongli0);
+            tv_temp = (TextView) findViewById(R.id.tv_temp);
+            tv_humiVal = (TextView) findViewById(R.id.tv_humiVal);
+            tv_weightVal = (TextView) findViewById(R.id.tv_weightVal);
 
 
             float wendu_float = Float.parseFloat(wendu_num);
             float shidu_float = Float.parseFloat(shidu_num);
             if (wendu_float > 40.0) {
-                wendu.setText(String.format("%s温度偏高,请再等一会...", wendu_num));
-            } else wendu.setText(wendu_num);
+                tv_temp.setText(String.format("%s温度偏高,请再等一会...", wendu_num));
+            } else tv_temp.setText(wendu_num);
             if (shidu_float > 65.0) {
-                shidu.setText(String.format("%s       !", shidu_num));
-            } else shidu.setText(shidu_num);
-            zhongli.setText(weight_num);
+                tv_humiVal.setText(String.format("%s       !", shidu_num));
+            } else tv_humiVal.setText(shidu_num);
+            tv_weightVal.setText(weight_num);
 
 
         } catch (JSONException e) {
