@@ -42,29 +42,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
     private static final String TAG = "MainActivity::";
-
     private HandlerThread handlerThread;
     private Handler handler;
     private ImageView imageView;
-
     private final int DOWNDLOAD = 1;
     private final int REGISTER = 2;
-
     static boolean ctrl_num = true; //true代表无更新温湿度及重力数据请求
-
     private static final int WRITE_PERMISSION = 0x01;
-
     String weight_num, wendu_num, shidu_num;
     TextView tv_temp, tv_humiVal, tv_weightVal;
-
     /* 在连接的路由器中查看 */
     String url_address = "192.168.124.56";  // 温湿度 ESP ip地址
     String url_add_esp32cam = "192.168.124.63";     // 摄像头 esp32-arduino ip地址
     private Button btn_connVid;
     private Button btn_updateEnvInfo;
-
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,12 +84,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_connVid:
+            {
                 handler.sendEmptyMessage(DOWNDLOAD);
                 break;
+            }
+
             case R.id.btn_updateEnvInfo:
+            {
                 handler.sendEmptyMessage(REGISTER);
                 ctrl_num = false;   //有更新温湿度重力数据请求
                 break;
+            }
             default:
                 break;
         }
@@ -107,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public HttpHandler(Looper looper) {
             super(looper);
         }
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -122,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
     private void dht_hx_data() {
         try {
             System.out.println("向ESP01S发送get请求中...");
@@ -133,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
-
     private void downloadFile() {
         if (!isGrantExternalRW(this)) {   //动态权限
             return;

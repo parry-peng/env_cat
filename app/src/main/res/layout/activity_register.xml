@@ -24,7 +24,7 @@
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/et_tel"
+            android:id="@+id/et_reg_telephone"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginTop="3dp"
@@ -52,7 +52,7 @@
             android:textSize="17sp" />
 
         <EditText
-            android:id="@+id/et_password"
+            android:id="@+id/et_reg_password"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginTop="3dp"

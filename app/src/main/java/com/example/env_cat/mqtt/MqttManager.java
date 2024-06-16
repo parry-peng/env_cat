@@ -1,4 +1,4 @@
-package com.example.env_cat;
+package com.example.env_cat.mqtt;
 
 import android.annotation.SuppressLint;
 import android.app.Service;

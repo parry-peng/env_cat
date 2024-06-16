@@ -29,23 +29,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.room.Room;
 
-import com.example.env_cat.DatabaseHelper;
+import com.example.env_cat.MyApplication;
+import com.example.env_cat.database.DatabaseHelper;
 import com.example.env_cat.MainActivity;
-import com.example.env_cat.MqttManager;
+import com.example.env_cat.database.UserDBHelper;
+import com.example.env_cat.enity.User;
+import com.example.env_cat.mqtt.MqttManager;
 import com.example.env_cat.R;
-import com.example.env_cat.database.UserDatabase;
 import com.example.env_cat.util.ViewUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.Objects;
 
 public class LoginMainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private EditText et_phone;
+    private EditText et_telephone;
     private EditText et_password;
     private CheckBox ck_remember;
     private Button btn_forget;
@@ -58,16 +59,9 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
     private static String action = "com.Login.ACTION_RECEIVE";//用于IntentFilter识别
     private static final String ACTION_PUBLISH = "com.Login.ACTION_PUBLISH";
     String ReceiverStr = null;//接收MQTT消息的变量
-
     DatabaseHelper dbHelper;
     private Button btn_login_register;
-
-
-    private static LoginMainActivity mApp;
-    public static LoginMainActivity getInstance() {
-        return mApp;
-    }
-
+    private MyApplication app;
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
@@ -75,6 +69,8 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login_main);
+
+        app = MyApplication.getInstance();
 
         /* 启动MQTT服务 */
         Intent intent = new Intent(getApplicationContext(), MqttManager.class);
@@ -95,7 +91,7 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
             return insets;
         });
 
-        et_phone = findViewById(R.id.et_phone);
+        et_telephone = findViewById(R.id.et_telephone);
         et_password = findViewById(R.id.et_password);
         btn_forget = findViewById(R.id.btn_forget);
         ck_remember = findViewById(R.id.ck_remember);
@@ -103,7 +99,7 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
         btn_login_register = findViewById(R.id.btn_login_register);
         btn_login_register.setOnClickListener(this);
 
-        et_phone.addTextChangedListener(new HideTextWatcher(et_phone, 11));
+        et_telephone.addTextChangedListener(new HideTextWatcher(et_telephone, 11));
         et_password.addTextChangedListener(new HideTextWatcher(et_password, 6));
         btn_forget.setOnClickListener(this);
         btn_login.setOnClickListener(this);
@@ -118,77 +114,31 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
                 }
             }
         });
-
         preferences = getSharedPreferences("config", Context.MODE_PRIVATE);
         reload();
-
-
     }
     @Override
     public void onClick(View v) {
+        String telephone = et_telephone.getText().toString();
+        String password = et_password.getText().toString();
         switch (v.getId()) {
             case R.id.btn_forget:
             {
-                String phone = et_phone.getText().toString();
-                String password = et_password.getText().toString();
-
-                if (phone.length() != 11) {
-                    Toast.makeText(this, "请输入正确的手机号", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 Intent intent = new Intent(this, LoginForgetActivity.class);
-                intent.putExtra("phone", phone);
+                intent.putExtra("phone", telephone);
                 register.launch(intent);
                 break;
             }
-
             case R.id.btn_login:
             {
-                String phone = et_phone.getText().toString();
-                String password = et_password.getText().toString();
-
-                SQLiteDatabase db = dbHelper.getReadableDatabase(); //create or open a database
-                Cursor cursor = db.query("users", new String[]{"user_id", "user_psw"}, "user_id=?", new String[]{phone}, null, null, null, "0,1");
-                if (!cursor.isBeforeFirst() || !cursor.moveToFirst()) {
-                    Toast.makeText(this, "请输入正确的用户名和密码", Toast.LENGTH_SHORT).show();
-                }
-                // 游标移动进行校验
-                if (cursor.moveToNext()) {
-                    String dbPassword = "";
-                    try {
-                        int columnIndex = cursor.getColumnIndexOrThrow("user_psw");
-                        dbPassword = cursor.getString(columnIndex);
-//                    String dbPassword = cursor.getString(cursor.getColumnIndex("user_psw"));// 从数据库获取密码进行校验
-                        cursor.close();// 关闭游标
-                        if (!dbPassword.equals(password)) { //密码校验未通过
-                            Toast.makeText(this, "本地校验失败,尝试查询服务器存储的用户中...", Toast.LENGTH_LONG).show();
-                        } else {   //密码校验通过
-                            Toast.makeText(this, "登录成功!", Toast.LENGTH_SHORT).show();
-                            // 创建一个意图对象，准备跳到指定的活动页面
-                            Intent intent_login2main = new Intent(this, MainActivity.class);
-                            // 设置启动标志：跳转到新页面时，栈中的原有实例都被清空，同时开辟新任务的活动栈
-                            intent_login2main.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent_login2main);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        // 处理列名不在结果中的情况
-                        Log.e("DatabaseError", "Column 'user_psw' not found in the query result.", e);
-                    }
-                } else {//本地没有查询到,查询云服务器上的账号
-                    Toast.makeText(this, "本地校验失败,尝试查询服务器存储的用户中...", Toast.LENGTH_LONG).show();
-                    Intent publishIntent = new Intent(ACTION_PUBLISH);//创建发布消息的Intent,用于连接MqttManager的接收器
-                    try {
-                        JSONObject JsonMESSAGE = new JSONObject();    //创建JSon字符串,用于封装账号信息
-                        JsonMESSAGE.put("pwd", password);
-                        JsonMESSAGE.put("phone", phone);
-                        publishIntent.putExtra("TOPIC", "/sys/android/service/verify");
-                        publishIntent.putExtra("MESSAGE", JsonMESSAGE.toString());
-                        sendBroadcast(publishIntent);//向MqttManager发送广播
-//                        publishIntent.getStringExtra("TOPIC");
-                    } catch (JSONException e) {
-                        Log.e("Login-Panel-JSONObject", "处理服务器返回的JSon字符串出错");
-                        throw new RuntimeException(e);
-                    }
+                // 查询
+                List<User> list =  app.getUserDB().queryByTelephone(telephone);
+                int count = list.size();
+                if (count > 0) {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(LoginMainActivity.this, "该账号不存在，请注册", Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
@@ -200,19 +150,16 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
             }
         }
     }
-
     private void reload() {
         boolean isRemember = preferences.getBoolean("isRemember", false);
         if (isRemember) {
             String phone = preferences.getString("phone", "");
-            et_phone.setText(phone);
-
+            et_telephone.setText(phone);
             String password = preferences.getString("password", "");
             et_password.setText(password);
             ck_remember.setChecked(true);
         }
     }
-
     /**
      * 广播消息接收器
      */
@@ -245,26 +192,20 @@ public class LoginMainActivity extends AppCompatActivity implements View.OnClick
             }
         }
     };
-
     private class HideTextWatcher implements TextWatcher {
         private EditText mView;
         private int mMaxLength;
-
         public HideTextWatcher(EditText v, int maxLength) {
             this.mView = v;
             this.mMaxLength = maxLength;
         }
-
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
         }
-
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-
         }
-
         @Override
         public void afterTextChanged(Editable s) {
             if (s.toString().length() == mMaxLength)

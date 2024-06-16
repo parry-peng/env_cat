@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:src="@drawable/login_avatar"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="120dp"
         />
 
     <TextView
@@ -41,7 +41,7 @@
             android:textSize="@dimen/common_font_size" />
 
         <EditText
-            android:id="@+id/et_phone"
+            android:id="@+id/et_telephone"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginTop="5dp"
